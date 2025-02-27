@@ -71,6 +71,27 @@ period $t$ is given by:
   P_{hjt} &= \frac{\exp(\beta_j^h + \eta^h x_{jt}^h)}{1 + \sum_{j=1}^J \exp(\beta_j^h + \eta^h x_{jt}^h)} \\
 \end{align*}
 
+For each individual $h$, we observe a sequence of choices $y_{ht} = (y_{h1},
+..., y_{hT})$. The likelihood function for an individual's sequence of choices
+is given by:
+
+The individual-level log-likelihood function is given by:
+\begin{align*}
+  \mathcal{L}_h(\Theta^h) &= \log\big(L_h(\Theta^h)\big) = \sum_{t=1}^T \sum_{j \in J} y_{jt}^h \log(P_{hjt}) \\
+  &= \sum_{j=1}^J \sum_{t=1}^T y_{jt}^h \log\left(\frac{\exp(\beta_j^h + \eta^h x_{jt}^h)}{1 + \sum_{j=1}^J \exp(\beta_j^h + \eta^h x_{jt}^h)}\right) \\
+\end{align*}
+
+Given that the choice set does not change over time, the denominator of the
+probability remains a simple expression.
+
+The score function for individual $h$ is given by:
+\begin{align*}
+  \nabla_{\Theta^h} \mathcal{L}_h(\Theta^h) &= \begin{bmatrix}
+\end{align*}
+
+
+
+
 
 
 
