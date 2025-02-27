@@ -18,8 +18,6 @@
 \usepackage{enumitem}
 \usepackage{dirtytalk}
 \usepackage{enumitem}
-\usepackage{yhmath}
-\usepackage{comment}
 \usepackage{tikz}
 \usepackage{pgfplots}
 \usepgfplotslibrary{fillbetween}
@@ -55,13 +53,25 @@
 \usepackage[a4paper, total={6in, 10in}]{geometry}
 
 \onehalfspacing
-\title{Template}
-\author{Antoine Chapel}
+\title{Empirical IO: Homework 1}
+\author{Cameron Scalera, Yoel Feinberg, Antoine Chapel}
 \date{\today}
 
 \begin{document}
 
 \maketitle
+
+\section*{Problem 1}
+\subsection*{Part (a)}
+
+The individual choice probability for individual $h$ to choose option $j$ at
+period $t$ is given by:
+
+\begin{align*}
+  P_{hjt} &= \frac{\exp(\beta_j^h + \eta^h x_{jt}^h)}{1 + \sum_{j=1}^J \exp(\beta_j^h + \eta^h x_{jt}^h)} \\
+\end{align*}
+
+
 
 
 
