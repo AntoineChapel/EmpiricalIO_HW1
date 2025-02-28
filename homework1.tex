@@ -98,12 +98,22 @@ The score function for individual $h$ is given by:
 \end{align*}
 
 \begin{align*}
-  \frac{\partial \mathcal{L}}{\partial \beta_k^h} &= \sum_j \sum_t y_{lt}^h \frac{\partial}{\partial \beta_k^h} \log(P_{hlt}) \\
+  \frac{\partial \mathcal{L}}{\partial \beta_k^h} &= \sum_j \sum_t y_{jt}^h \frac{\partial}{\partial \beta_k^h} \log(P_{hjt}) \\
+\end{align*}
+
+For easy notation, I denote $v_k = \beta_k^h + \eta^h x_{kt}^h$
+
+
+\begin{align*}
+  \frac{\partial P_{hjt}}{\partial \beta_k^h} &= \frac{1 + \sum_k e^{v_k}}{e^{v_j}} \frac{e^{v_j} (1+\sum_k e^{v_k}) - e^{v_j}e^{v_j}}{(1+\sum_k e^{v_k})^2} \\
+  &= \frac{1+\sum_k e^{v_k} - e^{v_j}}{1 + \sum_k e^{v_k}} \\
+  &= (1-P_{hjt})
 \end{align*}
 
 
 \begin{align*}
-  \frac{\partial P_{hjt}}{\partial \beta_k^h} &= \frac{1}{P_{hlt}} \frac{e^{\beta_l^h + \eta^h x_{lt}^h} (1+\sum_{})}{x}
+  \frac{\partial P_{hjt}}{\partial \beta_j^h} &= \frac{1 + \sum_k e^{v_k}}{e^{v_j}} \frac{e^{v_j} (1+\sum_k e^{v_k}) - e^{v_j}e^{v_j}}{(1+\sum_k e^{v_k})^2} \\
+  &= (1-P_{hjt}) x_{jt}^h
 \end{align*}
 
 
