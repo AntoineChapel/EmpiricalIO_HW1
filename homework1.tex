@@ -78,21 +78,33 @@ is given by:
 The individual-level log-likelihood function is given by:
 \begin{align*}
   \mathcal{L}_h(\Theta^h) &= \log\big(L_h(\Theta^h)\big) = \sum_{t=1}^T \sum_{j \in J} y_{jt}^h \log(P_{hjt}) \\
-  &= \sum_{j=1}^J \sum_{t=1}^T y_{jt}^h \log\left(\frac{\exp(\beta_j^h + \eta^h x_{jt}^h)}{1 + \sum_{j=1}^J \exp(\beta_j^h + \eta^h x_{jt}^h)}\right) \\
+  &= \sum_{t=1}^T \sum_{j=1}^J  y_{jt}^h \log\left(\frac{\exp(\beta_j^h + \eta^h x_{jt}^h)}{1 + \sum_{k=1}^J \exp(\beta_k^h + \eta^h x_{kt}^h)}\right) \\
 \end{align*}
 
-Given that the choice set does not change over time, the denominator of the
-probability remains a simple expression.
+Where $y_{jt}^h$ is to be correctly interpreted as an indicator for which
+alternative individual $h$ has chosen. Given that the choice set does not change
+over time, the denominator of the probability remains a simple expression.
 
 The score function for individual $h$ is given by:
+
+
 \begin{align*}
   \nabla_{\Theta^h} \mathcal{L}_h(\Theta^h) &= \begin{bmatrix}
+    \frac{\partial \mathcal{L}_h(\Theta^h)}{\partial \beta_1^h} \\
+    \vdots \\
+    \frac{\partial \mathcal{L}_h(\Theta^h)}{\partial \beta_J^h} \\
+    \frac{\partial \mathcal{L}_h(\Theta^h)}{\partial \eta^h} \\
+   \end{bmatrix}
+\end{align*}
+
+\begin{align*}
+  \frac{\partial \mathcal{L}}{\partial \beta_k^h} &= \sum_j \sum_t y_{lt}^h \frac{\partial}{\partial \beta_k^h} \log(P_{hlt}) \\
 \end{align*}
 
 
-
-
-
+\begin{align*}
+  \frac{\partial P_{hjt}}{\partial \beta_k^h} &= \frac{1}{P_{hlt}} \frac{e^{\beta_l^h + \eta^h x_{lt}^h} (1+\sum_{})}{x}
+\end{align*}
 
 
 
