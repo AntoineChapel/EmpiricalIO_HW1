@@ -105,16 +105,38 @@ For easy notation, I denote $v_k = \beta_k^h + \eta^h x_{kt}^h$
 
 
 \begin{align*}
-  \frac{\partial P_{hjt}}{\partial \beta_k^h} &= \frac{1 + \sum_k e^{v_k}}{e^{v_j}} \frac{e^{v_j} (1+\sum_k e^{v_k}) - e^{v_j}e^{v_j}}{(1+\sum_k e^{v_k})^2} \\
-  &= \frac{1+\sum_k e^{v_k} - e^{v_j}}{1 + \sum_k e^{v_k}} \\
-  &= (1-P_{hjt})
+  \frac{\partial \log(P_{hjt})}{\partial \beta_k^h} &= \frac{1 + \sum_k e^{v_k}}{e^{v_j}} \frac{- e^{v_j}e^{v_k}}{(1+\sum_k e^{v_k})^2} \\
+  &= -P_{hkt}
 \end{align*}
 
 
 \begin{align*}
-  \frac{\partial P_{hjt}}{\partial \beta_j^h} &= \frac{1 + \sum_k e^{v_k}}{e^{v_j}} \frac{e^{v_j} (1+\sum_k e^{v_k}) - e^{v_j}e^{v_j}}{(1+\sum_k e^{v_k})^2} \\
-  &= (1-P_{hjt}) x_{jt}^h
+  \frac{\partial \log(P_{hjt})}{\partial \beta_j^h} &= \frac{1 + \sum_k e^{v_k}}{e^{v_j}} \frac{e^{v_j} (1+\sum_k e^{v_k}) - e^{v_j}e^{v_j}}{(1+\sum_k e^{v_k})^2} \\
+  &= (1-P_{hjt})
 \end{align*}
+
+\begin{align*}
+  \frac{\partial \log(P_{hjt})}{\partial \eta^h} &= \frac{\partial}{\partial \eta_h} v_j - \log(1+\sum_k e^{v_k}) \\
+  &= x_{jt}^h - \frac{1}{1+\sum_k e^{v_k}} \sum_k e^{v_k} x_{kt}^h \\
+  &= x_{jt}^h - \sum_k P_{kt}^h x_{kt}^h
+\end{align*}
+
+So the score vector is given by:
+
+\begin{align*}
+  \nabla_{\Theta^h} \mathcal{L}_h(\Theta^h) &= \begin{bmatrix}
+    \sum_{t=1}^T \left( y_{1t}^h (1 - P_{h1t}) + \sum_{j \neq 1} y_{jt}^h (-P_{h1t}) \right) \\
+    \vdots \\
+    \sum_{t=1}^T \left( y_{Jt}^h (1 - P_{hJt}) + \sum_{j \neq J} y_{jt}^h (-P_{hJt}) \right) \\
+    \sum_{t=1}^T \sum_{j=1}^J y_{jt}^h \left( x_{jt}^h - \sum_{k=1}^J P_{hkt} x_{kt}^h \right) \\
+  \end{bmatrix}
+\end{align*}
+
+
+
+
+
+
 
 
 
