@@ -18,10 +18,12 @@ print(sigma)
 
 # generate the random parameters
 betas = np.random.multivariate_normal(mu.flatten(), sigma, N)
-print(betas.shape)
 
 price_transition_states = pd.read_csv(r'price_transition_states.csv')
 price_transition_matrix = pd.read_csv(r'transition_prob_matrix.csv')
 
 print(price_transition_states.head())
+
+
+
 

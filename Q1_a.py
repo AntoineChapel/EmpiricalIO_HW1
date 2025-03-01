@@ -21,6 +21,8 @@ print(sigma)
 betas = np.random.multivariate_normal(mu.flatten(), sigma, N)
 print(betas.shape)
 
+betas_np = betas[:, :-1]
+etas_np = betas[:, -1]
 
 
 ## generate prices
@@ -44,8 +46,22 @@ def simulate_prices(states, transition, T):
 
 
 price_50_by_6 = simulate_prices(price_transition_states_np, price_transition_matrix_np, T)
-print(price_50_by_6)
+prices_50_by_4 = price_50_by_6[:, :-2]
 
+
+## generate Utility data
+utility_np = np.zeros((J+1, N, T))
+for t in range(T):
+    for i in range(N):
+        utility_np[0, i, t] = np.random.gumbel()
+        utility_np[1:, i, t] = betas_np[i, :] + etas_np[i]*prices_50_by_4[t, :].flatten() + np.random.gumbel(size=J)
+
+## generate choice data
+choice_np = np.argmax(utility_np, axis=0)
+
+print(choice_np)
+
+print(choice_np.shape)
 
 
 ## part b: first-order Markov dependence
