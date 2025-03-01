@@ -19,3 +19,9 @@ print(sigma)
 # generate the random parameters
 betas = np.random.multivariate_normal(mu.flatten(), sigma, N)
 print(betas.shape)
+
+
+## part b: first-order Markov dependence
+
+
+
