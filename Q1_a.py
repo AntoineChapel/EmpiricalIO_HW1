@@ -85,7 +85,7 @@ def choice_probas(theta):
 @jit
 def likelihood(theta): #(log)-likelihood function
     probas_theta = choice_probas(theta)
-    log_likelihood = jnp.sum(jnp.log(probas_theta[jnp.arange(T), choice_np]))
+    log_likelihood = jnp.sum(jnp.log(probas_theta[jnp.arange(T), choice_jnp]))
     return -log_likelihood
 
 grad_likelihood = jit(grad(likelihood)) ## gradient of the likelihood function
