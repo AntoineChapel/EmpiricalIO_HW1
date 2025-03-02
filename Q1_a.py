@@ -2,8 +2,15 @@
 
 ## Part a, ii
 
-import numpy as np
-import pandas as pd
+import numpy as np 
+import pandas as pd 
+import time
+import jax.numpy as jnp
+from jax import grad, jit, vmap
+from jax.scipy.special import logsumexp
+import optax
+
+
 
 N = 1000
 J = 4
@@ -13,13 +20,10 @@ T = 50
 np.random.seed(123)
 mu = np.array([-1.71, 0.44, -1.37, -0.91, -1.23]).reshape(-1, 1)
 sigma = np.diag(np.array([3.22, 3.24, 2.87, 4.15, 1.38])).reshape(5, 5)
-print(mu, '\n')
-print(sigma)
 
 
 # generate the random parameters
 betas = np.random.multivariate_normal(mu.flatten(), sigma, N)
-print(betas.shape)
 
 betas_np = betas[:, :-1]
 etas_np = betas[:, -1]
@@ -57,14 +61,67 @@ for t in range(T):
         utility_np[1:, i, t] = betas_np[i, :] + etas_np[i]*prices_50_by_4[t, :].flatten() + np.random.gumbel(size=J)
 
 ## generate choice data
-choice_np = np.argmax(utility_np, axis=0)
+choice_np = jnp.argmax(utility_np, axis=0)
 
-print(choice_np)
-
-print(choice_np.shape)
+prices_50_by_4_jnp = jnp.array(prices_50_by_4)
 
 
-## part b: first-order Markov dependence
+@jit
+def choice_probas(theta):
+    theta_jnp = jnp.array(theta)
+    betas = theta_jnp[:-1]
+    eta = theta_jnp[-1]
+    v_1to4_utility = betas + eta * prices_50_by_4_jnp
+    v_default = jnp.zeros((T, 1))
+    v_utility = jnp.concatenate((v_default, v_1to4_utility), axis=1)
+
+    # Compute choice probabilities with improved numerical stability
+    log_sumexps = logsumexp(v_utility, axis=1)
+    probas = jnp.exp(v_utility - log_sumexps[:, None])
+
+    return probas
+
+
+@jit
+def likelihood(theta): #(log)-likelihood function
+    probas_theta = choice_probas(theta)
+    log_likelihood = jnp.sum(jnp.log(probas_theta[jnp.arange(T), choice_np]))
+    return -log_likelihood
+
+grad_likelihood = jit(grad(likelihood)) ## gradient of the likelihood function
+
+
+
+def minimize_adam(f, x0, norm=1e9, tol=0.1, lr=0.05, maxiter=1000):
+  tic = time.time()
+  solver = optax.adam(learning_rate=lr)
+  params = jnp.array(x0, dtype=jnp.float32)
+  opt_state = solver.init(params)
+  iternum = 0
+  while norm > tol and iternum < maxiter :
+    iternum += 1
+    grad = grad_likelihood(params) #personally computed gradients
+    updates, opt_state = solver.update(grad, opt_state, params)
+    params = optax.apply_updates(params, updates)
+    params = jnp.asarray(params, dtype=jnp.float32)
+    norm = jnp.max(jnp.abs(grad))
+    print(f"Iteration: {iternum}  Norm: {norm}  theta: {params}")
+  tac = time.time()
+  if iternum == maxiter:
+    print(f"Convergence not reached after {iternum} iterations. \nTime: {tac-tic} seconds. Norm: {norm}")
+  else:
+    print(f"Convergence reached after {iternum} iterations. \nTime: {tac-tic} seconds. Norm: {norm}")
+
+  return params
+
+
+theta_MLE_homogeneous = minimize_adam(likelihood, np.ones(5), lr=0.2)
+print(f'*********************************** \n \n theta MLE under homogeneous assumption: {theta_MLE_homogeneous} \n \n ***********************************')
+
+
+
+
+
 
 
 
