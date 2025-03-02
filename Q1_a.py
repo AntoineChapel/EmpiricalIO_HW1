@@ -61,7 +61,7 @@ for t in range(T):
         utility_np[1:, i, t] = betas_np[i, :] + etas_np[i]*prices_50_by_4[t, :].flatten() + np.random.gumbel(size=J)
 
 ## generate choice data
-choice_np = jnp.argmax(utility_np, axis=0)
+choice_jnp = jnp.argmax(utility_np, axis=0)
 
 prices_50_by_4_jnp = jnp.array(prices_50_by_4)
 
@@ -92,7 +92,7 @@ grad_likelihood = jit(grad(likelihood)) ## gradient of the likelihood function
 
 
 
-def minimize_adam(f, x0, norm=1e9, tol=0.1, lr=0.05, maxiter=1000):
+def minimize_adam(f, x0, norm=1e9, tol=0.1, lr=0.05, maxiter=1000, clipping=False, weights=False):
   tic = time.time()
   solver = optax.adam(learning_rate=lr)
   params = jnp.array(x0, dtype=jnp.float32)
@@ -104,6 +104,11 @@ def minimize_adam(f, x0, norm=1e9, tol=0.1, lr=0.05, maxiter=1000):
     updates, opt_state = solver.update(grad, opt_state, params)
     params = optax.apply_updates(params, updates)
     params = jnp.asarray(params, dtype=jnp.float32)
+    if clipping:
+      params = jnp.clip(params, 0, 1)
+    if weights:
+      params = params / jnp.sum(params)
+
     norm = jnp.max(jnp.abs(grad))
     print(f"Iteration: {iternum}  Norm: {norm}  theta: {params}")
   tac = time.time()
@@ -115,10 +120,57 @@ def minimize_adam(f, x0, norm=1e9, tol=0.1, lr=0.05, maxiter=1000):
   return params
 
 
-theta_MLE_homogeneous = minimize_adam(likelihood, np.ones(5), lr=0.2)
-print(f'*********************************** \n \n theta MLE under homogeneous assumption: {theta_MLE_homogeneous} \n \n ***********************************')
+theta_MLE_homo = minimize_adam(likelihood, np.ones(5), lr=0.2)
+
+###Computation of standard errors
+
+@jit
+def likelihood_it(theta, i, t):
+    probas_theta = choice_probas(theta)
+    likelihood_it = jnp.log(probas_theta[t, choice_jnp[i, t]])
+    return likelihood_it
+
+grad_likelihood_it = jit(grad(likelihood_it))
+
+@jit
+def outer_grad_likelihood(theta, i, t):
+    grad_it = (grad_likelihood_it(theta, i, t)).reshape(-1, 1)
+    return grad_it@grad_it.T
+
+grad_likelihood_it_vec = vmap(vmap(outer_grad_likelihood, in_axes=(None, 0, None)), in_axes=(None, None, 0))
 
 
+def compute_standard_errors(theta):
+    sum_outers = (1/(N*T)) * (jnp.sum(grad_likelihood_it_vec(theta, jnp.arange(N), jnp.arange(T)), axis=(0, 1)))
+    return jnp.diag(jnp.sqrt(jnp.linalg.inv(sum_outers)))
+
+
+se_homo = compute_standard_errors(theta_MLE_homo)
+
+print(f'*********************************** \n \n Theta MLE under homogeneous assumption: {theta_MLE_homo} \n Standard errors: {se_homo} \n \n ***********************************')
+
+
+
+
+
+
+## We define two different theta around the homogeneous_theta, and will estimate the weights that we can give to these thetas:
+## Improvement: compute the standard error around theta_MLE homogeneous and take the thetas that are 1 standard deviations away from the MLE
+
+theta_1 = theta_MLE_homo + jnp.array([0.5, 0.5, 0.5, 0.5, 0.5])
+theta_2 = theta_MLE_homo - jnp.array([0.5, 0.5, 0.5, 0.5, 0.5])
+
+def likelihood_weighted(weight):
+    probas_theta_1 = choice_probas(theta_1)
+    probas_theta_2 = choice_probas(theta_2)
+    log_likelihood = jnp.sum(jnp.log(weight[0]*probas_theta_1[jnp.arange(T), choice_jnp] + weight[1]*probas_theta_2[jnp.arange(T), choice_jnp]))
+    return -log_likelihood
+
+grad_likelihood_weighted = jit(grad(likelihood_weighted)) ## gradient of the likelihood function
+
+weights_2classes = minimize_adam(likelihood, 1/2 * np.ones(2), lr=0.2, clipping=True, weights=True)
+
+print(f'*********************************** \n \n theta MLE under 2 classes assumption: {weights_2classes} \n \n ***********************************')
 
 
 
