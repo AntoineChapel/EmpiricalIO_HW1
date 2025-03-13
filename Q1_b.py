@@ -22,11 +22,9 @@ T = 150
 
 # Generate the data
 np.random.seed(123)
-mu = np.array([-1.71, 0.44, -1.37, -0.91, -1.23, 1]).reshape(-1, 1)
-#sigma = np.diag(np.array([3.22, 3.24, 2.87, 4.15, 1.38, 1])).reshape(6, 6)
-
-sigma = np.diag(np.zeros(6)).reshape(6, 6)
-
+mu = np.array([-1.7, 0.44, -1.37, -0.91, -1.23, 1]).reshape(-1, 1)
+sigma = np.diag(np.array([3.22, 3.24, 2.87, 4.15, 1.38, 1])).reshape(6, 6)
+# sigma = np.diag(np.zeros(6)).reshape(6, 6) #done for testing purpose, theta_MLE_homo does recover mu
 
 print(mu, '\n')
 print(sigma)
@@ -120,7 +118,7 @@ def ccp(theta):
 
     # Compute choice probabilities 
     log_sumexps = logsumexp(v_utility_full, axis=2, keepdims=True)
-    probas = jnp.exp(v_utility - log_sumexps) #get the choice probabilities for each time period and product
+    probas = jnp.exp(v_utility_full - log_sumexps) #get the choice probabilities for each time period and product
 
     return probas
 
@@ -165,4 +163,7 @@ def minimize_adam(f, grad_f, x0, norm=1e9, tol=0.1, lr=0.05, maxiter=1000, verbo
   return params
 
 
-theta_MLE_homo = minimize_adam(likelihood, grad_likelihood, jnp.ones(6), lr=0.1, verbose=1, maxiter=5000)
+theta_MLE_homo = minimize_adam(likelihood, grad_likelihood, jnp.zeros(6), lr=0.01, verbose=1, maxiter=5000)
+
+
+
