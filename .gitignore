@@ -2,5 +2,7 @@
 *.log
 *.out
 EIO_hw1
-*.py
+computer.py
 Archive
+Dockerfile
+.dockerignore
