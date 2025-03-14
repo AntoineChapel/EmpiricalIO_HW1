@@ -7,7 +7,6 @@ import jax.numpy as jnp
 from jax import grad, jit, vmap
 from jax.scipy.special import logsumexp
 
-import numpy as np
 import optax
 from warnings import filterwarnings
 filterwarnings('ignore')
@@ -289,7 +288,7 @@ print("*****  Sanity Check: Mixed Logit under true sigma  *********")
 print("************************************************************")
 
 # %%
-### This does not converge properly and as the norm reduces, the bias is still very high
+### This does not converge, the bias is high
 theta_mixed_logit_correct = minimize_adam(mixed_logit_likelihood_correct, 
                                           grad_mixed_logit_likelihood_correct, 
                                           theta_MLE_homo, 
