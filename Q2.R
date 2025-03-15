@@ -4,6 +4,10 @@ library(knitr)
 library(tidyr)
 library(xtable)
 
+# Claude was used to help generate this code
+
+setwd("C:/Users/scale/Documents/Columbia/IO3")
+
 
 market_product_data <- read.csv("market_demand_simulated_data.csv")
 
@@ -325,21 +329,28 @@ elasticity_data <- calculate_elasticities(
 
 # Step 4: Calculate true own-price elasticities (assuming you have a demand function specified)
 # ---------------------------------------------------------------------------------
-# This is a placeholder - you need to replace this with the true elasticity calculation
-# based on your specific demand function and parameters
 calculate_true_elasticities <- function(data) {
-  # Placeholder function - replace with your actual formula
-  # For example, if you know the true parameters:
-  true_alpha = -1.5  # Replace with your true value
-  true_sigma_sat = 0.7  # Replace with your true value
-  true_sigma_wired = 0.8  # Replace with your true value
+  # True parameters from the problem set
+  true_alpha = -2  # Negative price coefficient as specified
+  
+  # Let's assume moderate nesting parameters (these would need to be adjusted
+  # based on the actual data-generating process if known)
+  true_sigma_sat = 0.5
+  true_sigma_wired = 0.7
   
   data %>%
     mutate(
-      true_elasticity = case_when(
+      # For multinomial logit (no nesting)
+      true_mnl_elasticity = true_alpha * p * (1 - s),
+      
+      # For nested logit (with nesting)
+      true_nested_elasticity = case_when(
         satellite == 1 ~ true_alpha * p * (1 - true_sigma_sat * within_nest_share - (1 - true_sigma_sat) * s),
         satellite == 0 ~ true_alpha * p * (1 - true_sigma_wired * within_nest_share - (1 - true_sigma_wired) * s)
-      )
+      ),
+      
+      # Choose which true elasticity to use for comparisons (using nested as default)
+      true_elasticity = true_nested_elasticity
     )
 }
 
@@ -355,7 +366,8 @@ elasticity_summary <- elasticity_data %>%
     Mean_OLS_Elasticity = mean(elas_ols),
     Mean_IV_Elasticity = mean(elas_iv),
     Mean_BLP_Elasticity = mean(elas_blp),
-    Mean_True_Elasticity = mean(true_elasticity),
+    Mean_True_MNL_Elasticity = mean(true_mnl_elasticity),
+    Mean_True_Nested_Elasticity = mean(true_nested_elasticity),
     RMSE_OLS = sqrt(mean((elas_ols - true_elasticity)^2)),
     RMSE_IV = sqrt(mean((elas_iv - true_elasticity)^2)),
     RMSE_BLP = sqrt(mean((elas_blp - true_elasticity)^2))
@@ -369,7 +381,8 @@ overall_elasticity <- elasticity_data %>%
     Mean_OLS_Elasticity = mean(elas_ols),
     Mean_IV_Elasticity = mean(elas_iv),
     Mean_BLP_Elasticity = mean(elas_blp),
-    Mean_True_Elasticity = mean(true_elasticity),
+    Mean_True_MNL_Elasticity = mean(true_mnl_elasticity),
+    Mean_True_Nested_Elasticity = mean(true_nested_elasticity),
     RMSE_OLS = sqrt(mean((elas_ols - true_elasticity)^2)),
     RMSE_IV = sqrt(mean((elas_iv - true_elasticity)^2)),
     RMSE_BLP = sqrt(mean((elas_blp - true_elasticity)^2))
@@ -381,7 +394,6 @@ elasticity_summary <- bind_rows(elasticity_summary, overall_elasticity)
 # Print the tables
 kable(coefficients_df, digits = 4, caption = "Model Parameter Estimates")
 kable(elasticity_summary, digits = 4, caption = "Own-Price Elasticity Comparison")
-
 
 
 

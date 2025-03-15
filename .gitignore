@@ -6,3 +6,5 @@ computer.py
 Archive
 Dockerfile
 .dockerignore
+*.tex
+*.pdf
